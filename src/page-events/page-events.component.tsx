@@ -1,29 +1,54 @@
 import React from 'react';
-import './page-events.component.css';
+import { ThemeProvider } from '@material-ui/core';
 
+import { Event } from './models/event.model';
+import { EventsService } from './services/events.service';
+import { rcaMuiTheme } from '../ui-shared/rca-mui.theme';
+
+import { Loader } from '../ui-shared/components/loader.component';
 import { PageEventsEvents } from './components/events/events.component';
 
-import { EventsService } from './services/events.service';
+import './page-events.component.css';
 
-export class PageEvents extends React.Component {
+interface State {
+    isLoading: boolean;
+    events: Event[] | null;
+}
+
+export class PageEvents extends React.Component<{}, State> {
     eventsService: any;
-    events: [] = [];
 
     constructor(props: any) {
         super(props);
-
         this.eventsService = new EventsService();
+        this.state = {
+            isLoading: true,
+            events: null,
+        };
     }
 
-    componentWillMount(): void {
-        this.events = this.eventsService.getAll();
+    async componentDidMount() {
+        const events = await this.eventsService.getAll();
+        this.setState({
+            ...this.state,
+            ...{
+                isLoading: false,
+                events: events
+            }
+        });
+
     }
 
     render() {
+        const { isLoading, events } = this.state;
+
         return (
-            <div className="page-events">
-                <PageEventsEvents events={this.events} />
-            </div>
+            <ThemeProvider theme={rcaMuiTheme}>
+                <div className="page-events">
+                    {isLoading && <Loader />}
+                    {events !== null && <PageEventsEvents events={events} />}
+                </div>
+            </ThemeProvider>
         );
     }
 }

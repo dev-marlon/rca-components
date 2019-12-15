@@ -82,7 +82,8 @@ export class PageEventsEvent extends React.Component<Props, State> {
                 </Header>
                 {this.props.event.description &&
                     <Description isOpen={this.state.isOpen}>
-                        {this.props.event.description}
+                        {this.props.event.description}<br />
+                        Start:  <strong>{this.props.event.date.toLocaleTimeString()} Uhr</strong>
                     </Description>
                 }
             </Wrapper>
