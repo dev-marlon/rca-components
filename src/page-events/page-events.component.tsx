@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ThemeProvider } from '@material-ui/core';
 
 import { Event } from './models/event.model';
@@ -10,45 +10,29 @@ import { PageEventsEvents } from './components/events/events.component';
 
 import './page-events.component.css';
 
-interface State {
-    isLoading: boolean;
-    events: Event[] | null;
-}
+export const PageEvents: React.FunctionComponent = () => {
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [events, setEvents] = useState<Event[] | null>(null);
 
-export class PageEvents extends React.Component<{}, State> {
-    eventsService: any;
+    useEffect(() => {
+        const eventsService = new EventsService();
 
-    constructor(props: any) {
-        super(props);
-        this.eventsService = new EventsService();
-        this.state = {
-            isLoading: true,
-            events: null,
+        const loadEvents = async () => {
+            const events = await eventsService.getAll();
+            setEvents(events);
         };
-    }
 
-    async componentDidMount() {
-        const events = await this.eventsService.getAll();
-        this.setState({
-            ...this.state,
-            ...{
-                isLoading: false,
-                events: events
-            }
-        });
+        loadEvents().then(() => setIsLoading(false));
 
-    }
+        // Run effect only once on component mount
+    }, []);
 
-    render() {
-        const { isLoading, events } = this.state;
-
-        return (
-            <ThemeProvider theme={rcaMuiTheme}>
-                <div className="page-events">
-                    {isLoading && <Loader />}
-                    {events !== null && <PageEventsEvents events={events} />}
-                </div>
-            </ThemeProvider>
-        );
-    }
-}
+    return (
+        <ThemeProvider theme={rcaMuiTheme}>
+            <div className="page-events">
+                {isLoading && <Loader />}
+                {events !== null && <PageEventsEvents events={events} />}
+            </div>
+        </ThemeProvider>
+    );
+};
